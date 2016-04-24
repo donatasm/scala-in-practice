@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Scala in practice</title>
+
+		<meta name="description" content="Scala in practice">
+		<meta name="author" content="Donatas Mažionis">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<div class="slides">
+				<section>
+					<h1>Scala in practice</h1>
+					<p>
+						<small><a href="http://twitter.com/donatasm">@donatasm</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>About me</h2>
+					<ul>
+						<li>Originally C# developer <a href="http://site.adform.com/">@adform</a></li>
+						<li>Deploying Scala to production for the last 2 years</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>How did that happen?</h2>
+					<h3>Or why would a C# developer search for something beyond .NET?</h3>
+				</section>
+
+				<section>
+					<h2>Online advertising</h2>
+					<h3>Scaling is hard</h3>
+					<img style="border:0" src="./img/http-requests-per-sec.png"></img>
+				</section>
+
+				<section>
+					<h2>Running everything on Windows and .NET</h2>
+					<ul>
+						<li>Everything is possible, if you try hard</li>
+						<li>Usually, what you need is already done by someone, but:
+							<ul>
+								<li>works only on Linux, or</li>
+								<li>"use at your own risk on Windows", or</li>
+								<li>is not implemented in .NET</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>..., for example</h2>
+					<ul>
+						<li>Deployment*
+							<ul>
+								<li>Puppet, Docker</li>
+							</ul>
+						</li>
+						<li>Fast, scalable and awesome data stores*
+							<ul>
+								<li>Cassandra, Aerospike, Vertica, Redis, Kafka</li>
+							</ul>
+						</li>
+						<li>High performance libraries and frameworks*
+							<ul>
+								<li>clients for the data stores, networking, data processing</li>
+							</ul>
+						</li>
+					</ul>
+					<p/>
+					<small>* may not be true anymore</small>
+				</section>
+
+				<section>
+					<h2>Why JVM?</h2>
+					<ul>
+						<li>Runs everywhere</li>
+						<li>Huge ecosystem of open-source libraries and frameworks</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Why not _?</h2>
+					<ul>
+						<li>Java</li>
+						<li>Clojure</li>
+						<li>Groovy, JRuby, Jython</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Quick facts about Scala</h2>
+					<ul>
+						<li>A scalable language, released in 2004</li>
+						<li>Object-oriented and functional</li>
+						<li>Statically typed with very strong type system</li>
+						<li>Current version 2.11.8</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Hello, world!</h2>
+					<h3>C#</h3>
+					<pre><code class="hljs cs">
+public static class Hello
+{
+	public static void Main(string[] args)
+	{
+		Console.WriteLine("Hello, world!");
+	}
+}
+					</code></pre>
+					<h3>Scala</h3>
+					<pre><code class="hljs scala">
+object Hello {
+	def main(args: Array[String]) {
+		println("Hello, world!")
+	}
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Syntax</h2>
+					<h3>C#</h3>
+					<pre><code class="hljs cs">
+interface I {}
+class B&lt;T&gt; {}
+class A : B&lt;String&gt;, I
+{
+	int MyMethod() { return 42; }
+}
+					</code></pre>
+					<h3>Scala</h3>
+					<pre><code class="hljs scala">
+trait T
+class B[T]
+class A extends B[String] with I {
+	def myMethod = 42
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Variables</h2>
+					<p>Scala supports two types of variable declarations:</p>
+					<p><em>var</em> declares a variable like in C#</p>
+					<pre><code class="hljs scala">
+var name = "world"
+name = name + "!"
+					</code></pre>
+					<p><em>val</em> declares a read-only value</p>
+					<pre><code class="hljs scala">
+val name = "world"
+name = name + 1 // ERROR
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Lazy vals</h2>
+					<h3>Scala</h3>
+					<pre><code class="hljs scala">
+lazy val resource = resourceExpensiveToCreate()
+					</code></pre>
+					<h3>C#</h3>
+					<pre><code class="hljs cs">
+Lazy&lt;Resource&gt; resource =
+	new Lazy&lt;Resource&gt;(
+		() => ResourceExpensiveToCreate(),
+		isThreadSafe = true);
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Methods</h2>
+					<pre><code class="hljs scala">
+class Hello {
+	def sayTo(name: String): String = {
+		return s"Hello, $name"
+	}
+}
+					</code></pre>
+					<pre class="fragment"><code class="hljs scala">
+class Hello {
+	def sayTo(name: String) = s"Hello, $name"
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Methods</h2>
+					<pre><code class="hljs scala">
+val hello = new Hello
+hello.sayTo("world")
+					</code></pre>
+					<pre class="fragment"><code class="hljs scala">
+val hello = new Hello
+hello sayTo "world"
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Defining data transfer objects in C#</h2>
+					<pre><code class="hljs cs">
+public sealed class Product
+{
+	private readonly string _name;
+	private readonly string _category;
+	private readonly int _price;
+
+	public Product(string name, string category, int price)
+	{
+		_name = name;
+		_category = category;
+		_price = price;
+	}
+
+	public string Name { get { return _name; }}
+	public string Category { get { return _category; }}
+	public int Price { get { return _price; }}
+
+	public override bool Equals(object other)
+	{
+		if (ReferenceEquals(null, other)) return false;
+		if (ReferenceEquals(this, other)) return true;
+		var o = (Product)other;
+		return o._name == _name
+			&& o._category == _category
+			&& o._price == _price;
+	}
+
+	public override int GetHashCode()
+	{
+		// magic using number 37, usually generated by tool
+	}
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Defining data transfer objects (DTO) in Scala</h2>
+					<pre><code class="hljs scala">
+case class Product(name: String, category: String, price: Int)
+					</code></pre>
+					<pre><code class="hljs scala">
+val p1 = Product("product1", "category1", 99)
+val p2 = Product("product1", "category1", 99)
+val p3 = Product("product2", "category2", 100)
+println(p1)
+println(p1 == p2)
+println(p2 == p3)
+println(p1.price)
+					</code></pre>
+					<pre><code class="hljs bash">
+Product(product1, category1, 99)
+true
+false
+99
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Transforming DTO in C#</h2>
+					<pre><code class="hljs cs">
+public static class ProductJson
+{
+	public static JsonObject ToJson(this Product product)
+	{
+		return new JsonObject(
+			new JsonProperty("name", product.Name),
+			new JsonProperty("category", product.Category),
+			new JsonProperty("price", product.Price)
+		);
+	}
+}
+					</code></pre>
+				<span class="fragment">
+					<p>And then:</p>
+					<pre><code class="hljs cs">
+var json = new Product("name", "category", 101).ToJson();
+					</code></pre>
+				</span>
+				</section>
+
+				<section>
+					<h2>Scala implicit conversions</h2>
+					<pre><code class="hljs scala">
+object ProductJson
+{
+	implicit def toJson(product: Product): JsonObject =
+		JsonObject(
+			JsonProperty("name", product.Name),
+			JsonProperty("category", product.Category),
+			JsonProperty("price", product.Price)
+		)
+}
+					</code></pre>
+				<span class="fragment">
+					<p>And then:</p>
+					<pre><code class="hljs scala">
+val json: JsonObject = Product("name", "category", 101);
+					</code></pre>
+				</span>
+				</section>
+
+				<section>
+					<h2>Scala implicit parameters</h2>
+					<pre><code class="hljs scala">
+case class User(id: Int)
+
+class UserRepository {
+  def getUserById(id: Int): User = {
+    // call to database
+  }
+}
+
+class UserService {
+  def getUserById(id: Int, repository: UserRepository): User = {
+    repository.getUserById(id)
+  }
+}
+					</code></pre>
+				<span class="fragment">
+					<p>And then:</p>
+					<pre><code class="hljs scala">
+val repository = new UserRepository()
+val service = new UserService()
+
+service.getUserById(1, repository)
+					</code></pre>
+				</span>
+				</section>
+
+				<section>
+					<h2>Scala implicit parameters</h2>
+					<pre><code class="hljs scala">
+class UserService {
+  def getUserById(id: Int)(implicit repository: UserRepository): User = {
+    repository.getUserById(id)
+  }
+}
+					</code></pre>
+				<span class="fragment">
+					<p>And then:</p>
+					<pre><code class="hljs scala">
+implicit val repository = new UserRepository()
+val service = new UserService()
+
+service.getUserById(1)
+					</code></pre>
+				</span>
+				</section>
+
+				<section>
+					<h2>Functions, Actions</h2>
+					<h3>C#</h3>
+					<pre><code class="hljs cs">
+Action a1 = () =&gt; {};
+Action&lt;int&gt; a2 = (int i) =&gt; {};
+Func&lt;int&gt; f1 = () =&gt; 0;
+Func&lt;int, int&gt; f2 = (int i) =&gt 0;
+					</code></pre>
+					<h3>Scala</h3>
+					<pre><code class="hljs scala">
+val a1 = () =&gt; {}
+val a2 = (i: Int) =&gt; {}
+val f1 = () =&gt; 0
+val f2 = (i: Int) =&gt 0
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>LINQ</h2>
+					<h3>C#</h3>
+					<pre><code class="hljs cs">
+var n = Enumerable.Range(1, 10);
+n.Select(i =&gt; i*i);
+n.Where(i =&gt; i%2 == 0);
+n.Take(3);
+n.Count();
+n.Distinct();
+n.Sum();
+					</code></pre>
+					<h3>Scala</h3>
+					<pre><code class="hljs scala">
+val n = 1 to 10
+n.map(i => i*i)
+n.filter(i => i%2 == 0)
+n.take(3)
+n.size
+n.distinct
+n.sum
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>That's (almost) it</h2>
+					<ul>
+						<li>Convert Java or C# code line by line to Scala, and...</li>
+						<li class="fragment">you'll have beautiful code. Win!</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Tests, for example</h2>
+					<pre><code class="hljs scala">
+test("four bids with the same price, winner is randomized") {
+  val adSlot = AdSlot(id = "1", minPrice = Money(1))
+  val adSlots = Set(adSlot)
+  val bidResponses = List(BidResponse("bidder", bids()))
+
+	val results = (1 to 1000)
+	  .map(_ => auctioneer.winningBids(adSlots, bidResponses).head)
+	  .groupBy(_.bid)
+	  .map { case (_, bids) =>  bids.toSeq.length / 1000.0 }
+
+  all(results) should equal(0.25 +- 0.01)
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Tests, for example</h2>
+					<pre><code class="hljs scala">
+it should "return 400 when request headers " +
+  "too large" in withNginxBidder { bidder =>
+
+  val headers = (1 to 8192)
+		.map(i => RawHeader(s"X-Header-$i", i.toString))
+
+  val response = bidder
+    .client
+    .send(Get(s"http://localhost:$nginxPort/")
+    .withHeaders(headers: _*))
+
+  response should equal (HttpResponse(400, HttpEntity.Empty,
+    List(`Content-Length`(0), Connection("close"))
+  ))
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Or DSL for rendiring html</h2>
+					<pre><code class="hljs scala">
+def statsPresentation(stats: Stats) = HttpResponse(
+  entity = HttpEntity(`text/html`,
+	&lt;html&gt;
+	  &lt;body&gt;
+    &lt;h1&gt;HttpServer Stats&lt;/h1&gt;
+    &lt;table&gt;
+      &lt;tr&gt;&lt;td&gt;days:&lt;/td&gt;&lt;td&gt;{stats.uptime.toDays}&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;hours:&lt;/td&gt;&lt;td&gt;{stats.uptime.toHours}&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;minutes:&lt;/td&gt;&lt;td&gt;{stats.uptime.toMinutes}&lt;/td&gt;&lt;/tr&gt;
+      &lt;tr&gt;&lt;td&gt;totalRequests:&lt;/td&gt;&lt;td&gt;{stats.totalRequests}&lt;/td&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+	  &lt;/body&gt;
+	&lt;/html&gt;.toString))
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Or abuse it</h2>
+					<h3>When you see this...</h3>
+					<pre>
+					<code class="hljs scala">
+val result = (0 /: |)(_ + _)
+					</code>
+					</pre>
+				<span class="fragment">
+					<pre>
+					<code class="hljs scala">
+val | = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
+					</code>
+					</pre>
+				</span>
+				<span class="fragment">
+					<pre>
+					<code class="hljs scala">
+val list = List(1, 2, 3, 4, 5, 6, 7, 8, 9)
+val result = list.foldLeft(0)(x, y => x + y)
+// result = 45
+					</code>
+					</pre>
+				</span>
+				</section>
+
+				<section>
+					<h2>Patterns</h2>
+				</section>
+
+				<section>
+					<h2>Cake Pattern</h2>
+					<h3>The famous pattern of doing DI in Scala</h3>
+				</section>
+
+				<section>
+					<h3>Classical example</h3>
+					<pre><code class="hljs scala">
+case class Size(width: Int, height: Int)
+case class Ad(id: Int, size: Size)
+
+trait AdRepository {
+  def get(id: Int): Ad
+  def find(size: Size): Ad
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Wrap it into component</h3>
+					<pre><code class="hljs scala">
+trait AdRepositoryComponent {
+  def adRepository: AdRepository
+
+  trait AdRepository {
+    def get(id: Int): Ad
+    def find(size: Size): Ad
+  }
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Dependency defined as self-type annotation</h3>
+					<pre><code class="hljs scala">
+// self-type annotation
+trait Bidder { this: AdRepositoryComponent =>
+
+  def getAd(id: Int): Ad =
+    adRepository.get(id)
+
+  def matchAd(size: Size): Ad =
+    adRepository.find(size)
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Concrete implementation</h3>
+					<pre><code class="hljs scala">
+trait MySqlAdRepositoryComponent extends AdRepositoryComponent {
+  def adRepository = new MySqlAdRepository
+
+  class MySqlAdRepository extends AdRepository {
+    override def get(id: Int): Ad = {
+      // TODO: get from database
+    }
+
+    override def find(size: Size): Ad = {
+			// TODO: get from database
+    }
+  }
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Finally, wiring it up</h3>
+					<pre><code class="hljs scala">
+class DefaultBidder extends Bidder with MySqlAdRepositoryComponent
+
+object BidderApplication {
+  def main(args: Array[String]): Unit = {
+    val bidder = new DefaultBidder
+    // ...
+  }
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Testing</h3>
+					<pre><code class="hljs scala">
+class BidderTest extends Bidder with AdRepositoryComponent {
+  lazy val adRepository: AdRepository = mock[AdRepository]
+
+	// TODO: write some tests
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Classical constructor injection, pimped with implicits</h3>
+					<pre><code class="hljs scala">
+class DefaultBidder(implicit val repository: AdRepository)
+
+object BidderApplication {
+  def main(args: Array[String]): Unit = {
+    implicit val repository = new MySqlAdRepository
+    val bidder = new DefaultBidder
+    // ...
+  }
+}
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Yes, but this is Java'ish code!</h2>
+				</section>
+
+				<section>
+					<h2>Scala is also great for OOP</h2>
+				</section>
+
+				<section>
+					<h2>Thank you!</h2>
+					<h3>QA</h3>
+				</section>
+
+			</div>
+		</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			Reveal.initialize({
+				controls: false,
+				progress: true,
+				history: true,
+				center: true,
+				transition: 'slide',
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() {
+						hljs.configure({
+							tabReplace: '  '
+						});
+						hljs.initHighlightingOnLoad();
+					}
+				},
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+			hljs.configure({
+				tabReplace: '  '
+			});
+		</script>
+	</body>
+</html>
